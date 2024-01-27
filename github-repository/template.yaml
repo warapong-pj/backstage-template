@@ -1,0 +1,61 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: create-github-repository
+  title: Create Github Repository
+  description: Create an Github repository
+  tags: [ 'github' ]
+spec:
+  owner: guests
+  type: service
+  parameters:
+    - title: Project name
+      required:
+        - name
+      properties:
+        name:
+          title: Name
+          type: string
+          description: Unique project name
+          ui:autofocus: true
+          ui:options:
+            rows: 5
+    - title: Github repository name
+      required:
+        - repoUrl
+      properties:
+        repoUrl:
+          title: Git server
+          type: string
+          ui:field: RepoUrlPicker
+          ui:options:
+            allowedHosts:
+              - github.com
+
+  steps:
+    # Each step executes an action, in this case one templates files into the working directory.
+    - id: fetch-base
+      name: Fetch Base
+      action: fetch:template
+      input:
+        url: ./content
+        values:
+          name: ${{ parameters.name }}
+
+    # This step publishes the contents of the working directory to GitHub.
+    - id: publish
+      name: Publish
+      action: publish:github
+      input:
+        allowedHosts: [ 'github.com' ]
+        description: project ${{ parameters.name }}
+        repoUrl: ${{ parameters.repoUrl }}
+
+# Outputs are displayed to the user after a successful execution of the template.
+  output:
+    links:
+      - title: Repository
+        url: ${{ steps['publish'].output.remoteUrl }}
+      - title: Open in catalog
+        icon: catalog
+        entityRef: ${{ steps['register'].output.entityRef }}
