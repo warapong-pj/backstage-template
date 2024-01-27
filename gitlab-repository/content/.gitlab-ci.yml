@@ -1,0 +1,21 @@
+image: ubuntu:22.04
+
+stages:
+  - test
+  - build
+  - deploy
+
+test:
+  stage: test
+  script:
+    - echo "test stage"
+
+build:
+  stage: build
+  script:
+    - echo "build stage"
+
+deploy:
+  stage: deploy
+  script:
+    - echo "deploy stage"
