@@ -1,0 +1,13 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: github-sample-application
+  description: |
+    github-sample-application
+  links:
+    - title: Documentation
+      url: https://backstage.io/docs
+spec:
+  type: library
+  owner: platform
+  lifecycle: experimental
