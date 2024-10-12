@@ -1,0 +1,111 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: create-aws-rds-postgres
+  title: Create AWS RDS Postgres
+  description: Create an AWS RDS Postgres
+  tags: [ 'aws', 'rds', 'postgres' ]
+spec:
+  owner: group:platform-team
+  type: template
+  parameters:
+    - title: Fill information
+      required:
+        - project
+        - name
+        - owner
+        - region
+        - environment
+        # - action
+      properties:
+        project:
+          title: Project
+          type: string
+          description: Project name
+          ui:autofocus: true
+          ui:options:
+            rows: 5
+        name:
+          title: Name
+          type: string
+          description: Unique resource name
+          ui:options:
+            rows: 5
+        owner:
+          title: Owner
+          type: string
+          description: Owner component
+          ui:field: OwnerPicker
+          ui:options:
+            catalogFilter:
+              kind: Group
+        region:
+          title:  AWS Region
+          type: string
+          description: AWS region
+          enum:
+            - ap-southeast-1
+        environment:
+          title: Environment
+          type: string
+          description: Deploy environment
+          enum:
+            - SIT
+            - UAT
+            - PRD
+            - DR
+        # action:
+        #   title: action
+        #   type: string
+        #   description: Terrafrom action(apply/destroy)
+        #   enum:
+        #     - apply
+        #     - destroy
+
+  steps:
+    - id: fetch-base
+      name: Fetch Base
+      action: fetch:template
+      input:
+        url: ./content
+        values:
+          project: ${{ parameters.project }}
+          environment: ${{ parameters.environment }}
+          name: ${{ parameters.name }}
+          owner: ${{ parameters.owner }}
+
+    - id: pull-request
+      name: Pull Request
+      action: publish:github:pull-request
+      input:
+        repoUrl: github.com?repo=infra-as-a-code&owner=warapong-pj
+        branchName: aws/s3/${{ parameters.name }}
+        title: Create AWS S3 ${{ parameters.name }} for ${{ parameters.project }} on ${{ parameters.environment }}
+        update: true
+        description: |
+          # Create AWS S3 resource
+
+          This's PR for create AWS S3 resource.
+          Region:  ${{ parameters.region }}
+          Resource Name: ${{ parameters.name }}
+          Environment: ${{ parameters.environment }}
+        targetPath: ${{ parameters.project }}/${{ parameters.environment }}/${{ parameters.name }}
+
+    # - id: register
+    #   name: Register
+    #   action: catalog:register
+    #   input:
+    #     repoContentsUrl: ${{ steps['pull-request'].output.remoteUrl }}
+    #     catalogInfoPath: 'aws/${{ parameters.project }}/${{ parameters.environment }}/${{ parameters.name }}/catalog-info.yaml'
+
+  output:
+    links:
+      - title: Github pull request
+        url: ${{ steps['pull-request'].output.remoteUrl }}
+        icon: github
+      # - title: Open in catalog
+      #   icon: catalog
+      #   entityRef: ${{ steps['register'].output.entityRef }}
+      - title: Terrafrom module
+        icon: docs
+        url: "https://registry.terraform.io/modules/terraform-aws-modules/s3-bucket/aws/4.1.2"

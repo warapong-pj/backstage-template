@@ -1,0 +1,81 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: create-kubernetes-helm-chart
+  title: Create Kubernetes Helm chart
+  description: Create an Kubernetes Helm chart
+  tags: [ 'kubernetes', 'helm' ]
+spec:
+  owner: group:platform-team
+  type: template
+  parameters:
+    - title: Fill information
+      required:
+        - project
+        - service
+        - owner
+      properties:
+        project:
+          title: Project
+          type: string
+          description: Project name
+          ui:autofocus: true
+          ui:options:
+            rows: 5
+        service:
+          title: Service
+          type: string
+          description: Unique service name
+          ui:options:
+            rows: 5
+        owner:
+          title: Owner
+          type: string
+          description: Owner component
+          ui:field: OwnerPicker
+          ui:options:
+            catalogFilter:
+              kind: Group
+
+  steps:
+    - id: fetch-base
+      name: Fetch Base
+      action: fetch:template
+      input:
+        url: ./content
+        values:
+          project: ${{ parameters.project }}
+          service: ${{ parameters.service }}
+          owner: ${{ parameters.owner }}
+
+    - id: pull-request
+      name: Pull Request
+      action: publish:github:pull-request
+      input:
+        repoUrl: github.com?repo=gitops&owner=warapong-pj
+        branchName: kubernetes/kustomize/${{ parameters.service }}
+        title: Create Kubernetes manifest service ${{ parameters.service }} for ${{ parameters.project }}
+        update: true
+        description: |
+          # Create Kubernetes manifest
+
+          This's PR for Create Kubernetes manifest.
+          Project: ${{ parameters.project }}
+          Service: ${{ parameters.service }}
+        targetPath: ${{ parameters.project }}/${{ parameters.service }}
+
+    # - id: register
+    #   name: Register
+    #   action: catalog:register
+    #   input:
+    #     repoContentsUrl: ${{ steps['pull-request'].output.remoteUrl }}
+    #     catalogInfoPath: 'aws/${{ parameters.project }}/${{ parameters.environment }}/${{ parameters.name }}/catalog-info.yaml'
+
+  output:
+    links:
+      - title: Github pull request
+        url: ${{ steps['pull-request'].output.remoteUrl }}
+        icon: github
+      # - title: Open in catalog
+      #   icon: catalog
+      #   entityRef: ${{ steps['register'].output.entityRef }}
