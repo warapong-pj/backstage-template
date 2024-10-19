@@ -50,6 +50,13 @@ spec:
           type: string
           description: Deploy environment
           enum:
+            - d
+            - s
+            - u
+            - p
+            - r
+          enumNames:
+            - DEV
             - SIT
             - UAT
             - PRD
