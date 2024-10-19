@@ -45,11 +45,22 @@ spec:
           description: AWS region
           enum:
             - ap-southeast-1
+            - ap-east-1
+          enumNames:
+            - Singapore
+            - Hong Kong
         environment:
           title: Environment
           type: string
           description: Deploy environment
           enum:
+            - d
+            - s
+            - u
+            - p
+            - r
+          enumNames:
+            - DEV
             - SIT
             - UAT
             - PRD
@@ -69,6 +80,7 @@ spec:
       input:
         url: ./content
         values:
+          region: ${{ parameters.region }}
           project: ${{ parameters.project }}
           environment: ${{ parameters.environment }}
           name: ${{ parameters.name }}

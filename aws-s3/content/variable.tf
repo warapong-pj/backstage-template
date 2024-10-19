@@ -1,17 +1,17 @@
 variable "region" {
-  default = "ap-southeast-1"
+  default = ${{ values.region | dump }}
 }
 
 variable "project" {
-  default = "demo"
+  default = ${{ values.project | dump }}
 }
 
 variable "environment" {
-  default = "s"
+  default = ${{ values.environment | dump }}
 }
 
 variable "name" {
-  default = "sample"
+  default = ${{ values.name | dump }}
 }
 
 variable "acl" {
@@ -19,5 +19,5 @@ variable "acl" {
 }
 
 variable "owner" {
-  default = "platform team"
+  default = ${{ values.owner | dump }}
 }
