@@ -1,9 +1,19 @@
 apiVersion: backstage.io/v1alpha1
 kind: Group
 metadata:
+  name: demo
+spec:
+  type: root
+  profile:
+    displayName: demo
+  children: []
+---
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
   name: platform-team
 spec:
-  type: department
+  type: team
   parent: demo
   profile:
     displayName: platform team
@@ -14,7 +24,7 @@ kind: Group
 metadata:
   name: alpha-team
 spec:
-  type: department
+  type: team
   parent: demo
   profile:
     displayName: alpha team
@@ -25,7 +35,7 @@ kind: Group
 metadata:
   name: bravo-team
 spec:
-  type: department
+  type: team
   parent: demo
   profile:
     displayName: bravo team
@@ -36,7 +46,7 @@ kind: Group
 metadata:
   name: charlie-team
 spec:
-  type: department
+  type: team
   parent: demo
   profile:
     displayName: charlie team
