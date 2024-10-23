@@ -3,6 +3,6 @@ kind: Resource
 metadata:
   name: ${{ values.name | dump }}
 spec:
-  type: service
+  type: message queue
   owner: ${{ values.owner | dump }}
   lifecycle: experimental
