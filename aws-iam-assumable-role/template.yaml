@@ -1,0 +1,163 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: create-aws-iam
+  title: Create AWS IAM role
+  description: Create an AWS Role
+  tags: [ 'aws', 'iam' ]
+spec:
+  owner: group:platform-team
+  type: template
+  parameters:
+    - title: Fill information
+      required:
+        - project
+        - name
+        - comment
+        - owner
+        - region
+        - environment
+        # - action
+      properties:
+        project:
+          title: Project
+          type: string
+          description: Project name
+          pattern: '^([a-zA-Z0-9]+)*$'
+          ui:autofocus: true
+          ui:options:
+            rows: 5
+        name:
+          title: Name
+          type: string
+          description: Unique resource name
+          pattern: '^([a-zA-Z0-9]+)*$'
+          ui:options:
+            rows: 5
+        comment:
+          title: Comment
+          type: string
+          description: Please help fill reason request
+          ui:widget: textarea
+          ui:options:
+            rows: 5
+        owner:
+          title: Owner
+          type: string
+          description: Owner component
+          ui:field: OwnerPicker
+          ui:options:
+            catalogFilter:
+              kind: Group
+        region:
+          title:  AWS Region
+          type: string
+          description: AWS region
+          enum:
+            - ap-southeast-1
+            - ap-east-1
+          enumNames:
+            - Singapore
+            - Hong Kong
+        environment:
+          title: Environment
+          type: string
+          description: Deploy environment
+          enum:
+            - d
+            - s
+            - u
+            - p
+            - r
+          enumNames:
+            - DEV
+            - SIT
+            - UAT
+            - PRD
+            - DR
+        roleArn:
+          title: Role ARN
+          type: string
+          description: Role ARN
+          ui:options:
+            rows: 5
+        iamPolicy:
+          title: IAM policy
+          type: string
+          ui:widget: textarea
+          ui:options:
+            rows: 10
+
+      #   integrateIam:
+      #     title: Integrate IAM
+      #     type: boolean
+      #     default: false
+
+      # dependencies:
+      #   integrateIam:
+      #     allOf:
+      #       - if:
+      #           properties:
+      #             integrateIam:
+      #               const: true
+      #         then:
+      #           properties:
+      #             arn:
+      #               title: Amazon Resource Names
+      #               type: string
+      #           # You can use additional fields of parameters within conditional parameters such as required.
+      #           required:
+      #             - integrateIam
+
+  steps:
+    - id: fetch-base
+      name: Fetch Base
+      action: fetch:template
+      input:
+        url: ./content
+        values:
+          region: ${{ parameters.region }}
+          project: ${{ parameters.project }}
+          environment: ${{ parameters.environment }}
+          name: ${{ parameters.name }}
+          comment: ${{ parameters.comment }}
+          owner: ${{ parameters.owner }}
+          roleArn: ${{ parameters.roleArn }}
+          iamPolicy: ${{ parameters.iamPolicy }}
+
+    - id: pull-request
+      name: Pull Request
+      action: publish:github:pull-request
+      input:
+        repoUrl: github.com?repo=infra-as-a-code&owner=warapong-pj
+        branchName: aws/iam/${{ parameters.project }}/${{ parameters.environment }}/${{ parameters.name }}
+        title: Create AWS IAM role ${{ parameters.name }} for ${{ parameters.project }}
+        update: true
+        description: |
+          # Create AWS IAM role resource
+
+          This's PR for create AWS IAM role resource.
+          Region:  ${{ parameters.region }}
+          Resource Name: ${{ parameters.project }}-${{ parameters.environment }}-${{ parameters.name }}
+
+          ${{ parameters.comment }}
+        targetPath: ${{ parameters.project }}/${{ parameters.environment }}/${{ parameters.name }}
+
+    # - id: register
+    #   name: Register
+    #   action: catalog:register
+    #   input:
+    #     repoContentsUrl: ${{ steps['pull-request'].output.remoteUrl }}
+    #     catalogInfoPath: 'aws/${{ parameters.project }}/${{ parameters.environment }}/${{ parameters.name }}/catalog-info.yaml'
+
+  output:
+    links:
+      - title: Github pull request
+        url: ${{ steps['pull-request'].output.remoteUrl }}
+        icon: github
+      # - title: Open in catalog
+      #   icon: catalog
+      #   entityRef: ${{ steps['register'].output.entityRef }}
+      - title: Terrafrom module
+        icon: docs
+        url: "https://registry.terraform.io/modules/terraform-aws-modules/s3-bucket/aws/4.1.2"
